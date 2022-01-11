@@ -30,7 +30,7 @@ nu Z.(forall s1: Session, r1,r2: Role .
              <t(s2, r3, r4, m2, p2)>true)
           &&
           (forall s2: Session, r3,r4: Role, m2: Message, p2: Payload .
-             [t(s1, r3, r4, m2, p2)]Y)
+             [t(s2, r3, r4, m2, p2)]Y)
         )
       )        
   )
