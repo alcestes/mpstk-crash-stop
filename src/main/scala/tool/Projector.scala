@@ -56,7 +56,7 @@ object Projector extends Common {
     val cfg = new Config
     val cmdline = new picocli.CommandLine(cfg)
     try {
-      cmdline.parse(args:_*)
+      cmdline.parseArgs(args:_*)
 
       setLogLevel(cfg)
 
