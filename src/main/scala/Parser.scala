@@ -178,17 +178,20 @@ protected[parser]
 class ContextParser extends MPSTParser {
   def session: Parser[Session] = identifier ^^ { s => Session(s) }
 
+  def unreliableSym: Parser[String] = "⚠" | "!"
+
   def channel: Parser[Channel] = session ~ ("[" ~> role <~ "]") ^^ {
     sr => Channel(sr._1, sr._2)
   }
 
-  def entry: Parser[(Channel, MPST)] = channel ~ (":" ~> closedmpst) ^^ { cs =>
-    (cs._1, cs._2)
+  // The third element of the parsed triple is true if the entry is reliable
+  def entry: Parser[(Channel, MPST, Boolean)] = opt(unreliableSym) ~ (channel ~ (":" ~> closedmpst)) ^^ { cs =>
+    (cs._2._1, cs._2._2, cs._1.isEmpty)
   }
 
-  def entries: Parser[List[(Channel, MPST)]] = {
+  def entries: Parser[List[(Channel, MPST, Boolean)]] = {
     repsep(entry, ",") ^? ({
-      case l: List[(Channel, MPST)] if (
+      case l: List[(Channel, MPST, Boolean)] if (
         // Ensure that channels are unique
         l.map(_._1).distinct.size == l.size
       ) => l
@@ -201,7 +204,10 @@ class ContextParser extends MPSTParser {
     })
   }
 
-  def context: Parser[Context] = entries ^^ { entries => Context(entries:_*) }
+  def context: Parser[Context] = entries ^^ { entries =>
+    Context(Map(entries.map(e => (e._1, e._2)):_*),
+            entries.filter(_._3).map(_._1).toSet)
+  }
 }
 
 /** Parser for session typing contexts. */

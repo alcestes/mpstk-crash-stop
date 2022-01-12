@@ -16,10 +16,11 @@ sealed abstract class GlobalType {
         s"${rl._1}: ${rl._2.left.get}"
       }.mkString("\n")
       Left(s"The following projections are undefined:\n${errors}")
-    } else Right(Context(
+    } else {
       // NOTE: since we are projectable, .right.get below won't fail
-      projections.toSeq.map(rt => (Channel(s, rt._1), rt._2.right.get)):_*
-    ))
+      val m = projections.map(rt => (Channel(s, rt._1), rt._2.right.get))
+      Right(Context(m, m.keySet))
+    }
   }
 
   /** Does the global type have guarded recursion variables, only? */

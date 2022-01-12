@@ -105,11 +105,14 @@ class Context(orig: mpstk.Context,
       }
     }
   }
+
+  /** The set of channels (with roles) assumed reliable in this context. */
+  val reliable: Set[Channel] = orig.reliable
 }
 
 object Context {
   def apply(orig: mpstk.Context): Context = {
-    new Context(orig, Map(orig.toSeq.map(ct => (ct._1, ct._2.toRaw)):_*))
+    Context(orig, orig.map(ct => (ct._1, ct._2.toRaw)))
   }
 
   protected[raw]

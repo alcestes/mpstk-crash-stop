@@ -16,13 +16,13 @@ protected[mpstk] class ContextImpl[V](impl: Map[Channel, V])
 }
 
 protected[mpstk]
-class Context(impl: Map[Channel, MPST]) extends ContextImpl[MPST](impl) {
+class Context(impl: Map[Channel, MPST], val reliable: Set[Channel]) extends ContextImpl[MPST](impl) {
   /** Return a context where all types respect the Barendregt convention */
   def barendregt: Context = ops.barendregt(this)
 
   /** Return a context where all types have unfolded payloads */
   def unfoldPayloads: Context = {
-    Context(this.toSeq.map(ct => (ct._1, ct._2.unfoldPayloads)):_*)
+    new Context(this.map(ct => (ct._1, ct._2.unfoldPayloads)), this.reliable)
   }
 
   /** Return the raw version of this context */
@@ -35,16 +35,22 @@ class Context(impl: Map[Channel, MPST]) extends ContextImpl[MPST](impl) {
 object Context {
   import parser.ContextParser
 
-  /** Create a session typing context with the given entries. */
-  def apply(elems: (Channel, MPST)*): Context = {
-    new Context(Map(elems:_*))
+  /** Create a session typing context with the given entries, and set of
+    * entries assumed reliable. */
+  def apply(reliable: Set[Channel], elems: (Channel, MPST)*): Context = {
+    Context(Map(elems:_*), reliable)
   }
 
+  /** Create a session typing context with the given entries, and set of
+    * entries assumed reliable. */
+  def apply(m: Map[Channel, MPST], reliable: Set[Channel]): Context = {
+    new Context(m, reliable)
+  }
   /** Create a session typing context by parsing the given string */
   def apply(input: String): ContextParser.ParseResult[Context] = {
     ContextParser.parse(input)
   }
 
   /** Empty typing context. */
-  val empty: Context = new Context(Map())
+  val empty: Context = new Context(Map(), Set.empty)
 }

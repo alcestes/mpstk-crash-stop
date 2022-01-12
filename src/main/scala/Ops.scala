@@ -115,7 +115,7 @@ package object impl {
   // have unique recursion vars
   protected[mpstk]
   def barendregt(ctx: Context): Context = {
-    Context(ctx.map { ct => (ct._1, ct._2.barendregt) }.toSeq:_* )
+    Context(ctx.map { ct => (ct._1, ct._2.barendregt) }, ctx.reliable)
   }
 
   // Compute the set of bound variables in the given type
