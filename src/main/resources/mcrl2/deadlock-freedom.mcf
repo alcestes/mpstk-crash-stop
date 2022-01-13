@@ -6,13 +6,13 @@
 nu Z.(
   (
     (forall s1: Session, r1,r2: Role, m1: Message, p1: Payload .
-       [t(s1, r1, r2, m1, p1)]false) =>
+       [t(c(s1, r1, r2, m1, p1))]false) =>
       (
         forall s1: Session, r1,r2: Role, m1: Message, p1: Payload .
-          [i(s1, r1, r2, m1, p1)]false && [o(s1, r1, r2, m1, p1)]false
+          [i(c(s1, r1, r2, m1, p1))]false && [o(c(s1, r1, r2, m1, p1))]false
       )
   )
   &&
-  [exists s1: Session, r1,r2: Role, m1: Message, p1: Payload .
-     t(s1, r1, r2, m1, p1)]Z
+  forall s1: Session, r1,r2: Role, m1: Message, p1: Payload .
+     [t(c(s1, r1, r2, m1, p1))]Z
 )

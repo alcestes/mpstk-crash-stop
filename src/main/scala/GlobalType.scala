@@ -6,6 +6,7 @@ package mpstk
 /** Global type */
 sealed abstract class GlobalType {
   /** Get a global typing context from the global type, if projectable.
+    * In the resulting context, all entries are assumed to be reliable.
     *
     * @param s the session of each entry
     */

@@ -193,33 +193,40 @@ class Spec(global: Option[mpstk.GlobalType], ctx: mpstk.Context,
   // Convert a typing context into a mCRL2 process spec
   private lazy val body: String = adaptedCtx.map { ct =>
     val entry = entries(ct)
+    val reliable = adaptedCtx.reliable.contains(ct._1)
     // Turn each entry into a definition, and call it
-    mpstToSpec(ct._1, ct._2).toDef(entry) + Proc(List(entry))
+    mpstToSpec(ct._1, ct._2, reliable).toDef(entry) + Proc(List(entry))
   }.foldLeft(Proc()) { _ || _ }.toDef("context").render
 
   // Convert a session type for the given channel into a (sequential)
   // mCRL2 process spec
-  private def mpstToSpec(chan: Channel, t: MPST): Proc = t match {
+  private def mpstToSpec(chan: Channel, t: MPST, reliable: Boolean): Proc = t match {
     case End => Proc()
     case Branch(from, choices) => choices.map { lpc =>
-      val contSpec = mpstToSpec(chan, lpc._2.cont)
-      Proc(
-        List(s"i(${sessions(chan.session)}, ${roles(from)}, ${roles(chan.role)}, ${labels(lpc._1)}, ${payloadTypes(lpc._2.payload)})") ++ contSpec.current,
-        contSpec.defs
-      )
-    }.foldLeft(Proc()) { _ + _ }
+      val contSpec = mpstToSpec(chan, lpc._2.cont, reliable)
+      val branch = if (lpc._1.name != "crash") {
+        s"i(c(${sessions(chan.session)}, ${roles(from)}, ${roles(chan.role)}, ${labels(lpc._1)}, ${payloadTypes(lpc._2.payload)}))"
+      } else {
+        s"crashDetect(e(${sessions(chan.session)}, ${roles(from)}))"
+      }
+      Proc(List(branch) ++ contSpec.current, contSpec.defs)
+    }.foldLeft(Proc()) { _ + _ } + (if (reliable) Proc() else {
+      Proc(List(s"crashedP(${sessions(chan.session)}, ${roles(chan.role)})"))
+    })
     case Select(to, choices) => choices.map { lpc =>
-      val contSpec = mpstToSpec(chan, lpc._2.cont)
+      val contSpec = mpstToSpec(chan, lpc._2.cont, reliable)
       Proc(
-        List(s"o(${sessions(chan.session)}, ${roles(chan.role)}, ${roles(to)}, ${labels(lpc._1)}, ${payloadTypes(lpc._2.payload)})") ++ contSpec.current,
+        List(s"o(c(${sessions(chan.session)}, ${roles(chan.role)}, ${roles(to)}, ${labels(lpc._1)}, ${payloadTypes(lpc._2.payload)}))") ++ contSpec.current,
         contSpec.defs
       )
-    }.foldLeft(Proc()) { _ + _ }
+    }.foldLeft(Proc()) { _ + _ } + (if (reliable) Proc() else {
+      Proc(List(s"crashedP(${sessions(chan.session)}, ${roles(chan.role)})"))
+    })
     case Rec(recvar, body) => {
       // NOTE: we exploit the Barendregt convention, to guarantee proc fresh
       val proc = processes((chan, recvar))
       // Encode the recursive process definition into dSpec...
-      val dSpec = mpstToSpec(chan, body).toDef(proc)
+      val dSpec = mpstToSpec(chan, body, reliable).toDef(proc)
       // ...and return a spec that calls the definition we just placed in dSpec
       Proc(List(proc)) + dSpec
     }

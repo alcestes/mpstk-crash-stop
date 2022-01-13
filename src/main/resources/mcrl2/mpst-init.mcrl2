@@ -6,6 +6,9 @@
 %%% using the definitions in mpst-preamble.mcrl2.
 %%%
 %%% NOTE: the following requires the "context" process to be defined
-init allow({i, o, t}, comm( {i|o->t},
-  context
-));
+init allow({i, o, t, crash, crashed, crashDetect, crasht},
+            comm( {i|o->t},
+                  comm( {crashed|crashDetect->crasht},
+                        comm( {o|crashed->crasht},
+                              context
+))));
