@@ -211,7 +211,7 @@ class Spec(global: Option[mpstk.GlobalType], ctx: mpstk.Context,
       }
       Proc(List(branch) ++ contSpec.current, contSpec.defs)
     }.foldLeft(Proc()) { _ + _ } + (if (reliable) Proc() else {
-      Proc(List(s"crashedP(${sessions(chan.session)}, ${roles(chan.role)})"))
+      Proc(List(s"crashP(${sessions(chan.session)}, ${roles(chan.role)})"))
     })
     case Select(to, choices) => choices.map { lpc =>
       val contSpec = mpstToSpec(chan, lpc._2.cont, reliable)
@@ -220,7 +220,7 @@ class Spec(global: Option[mpstk.GlobalType], ctx: mpstk.Context,
         contSpec.defs
       )
     }.foldLeft(Proc()) { _ + _ } + (if (reliable) Proc() else {
-      Proc(List(s"crashedP(${sessions(chan.session)}, ${roles(chan.role)})"))
+      Proc(List(s"crashP(${sessions(chan.session)}, ${roles(chan.role)})"))
     })
     case Rec(recvar, body) => {
       // NOTE: we exploit the Barendregt convention, to guarantee proc fresh

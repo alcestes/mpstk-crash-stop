@@ -7,8 +7,8 @@
 %%%
 %%% NOTE: the following requires the "context" process to be defined
 init allow({i, o, t, crash, crashed, crashDetect, crasht},
-            comm( {i|o->t},
-                  comm( {crashed|crashDetect->crasht},
-                        comm( {o|crashed->crasht},
-                              context
+           comm({o|i->t},
+                comm({crashed|crashDetect->crasht},
+                     comm({o|crashed->t},
+                          context
 ))));

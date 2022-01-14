@@ -2,6 +2,9 @@
 %%% roles can interact, then the inputs of the receiver are a superset of
 %%% the outputs of the sender.
 %%%
+%%% Copyright 2022 Technical University of Denmark
+%%%                Alceste Scalas <alcsc @ dtu.dk>
+%%%                Adam Barwell <a.barwell @ imperial.ac.uk>
 %%% Copyright 2018 Alceste Scalas <alceste.scalas @ imperial.ac.uk>
 %%% Released under the MIT License: https://opensource.org/licenses/MIT
 
@@ -11,5 +14,9 @@ nu X.(
       <t(c(s1, r1, r2, m1, p1))>true)
     &&
     [t(c(s1, r1, r2, m1, p1))]X
+    &&
+    [crash(e(s1, r1))]X
+    &&
+    [crasht(e(s1, r1))]X
   )
 )
