@@ -1,0 +1,13 @@
+### A DNS example with crash detection and failover
+###
+### Copyright 2022 Technical University of Denmark
+###                Alceste Scalas <alcsc @ dtu.dk>
+### Released under the MIT License: https://opensource.org/licenses/MIT
+
+s[p]: q⊕req(string) . q&{resp(int),
+                         crash . r⊕req(string) . r&{resp(int),
+                                                    crash }},
+
+!s[q]: p&req(string) . p⊕resp(int),
+
+!s[r]: q&crash . p&req(string) . p⊕resp(int)
