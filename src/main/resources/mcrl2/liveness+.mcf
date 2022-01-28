@@ -1,23 +1,24 @@
-%%% Liveness+: when i(s, r1, r2, -, -) / o(s, r1, r2, m, p) is enabled,
-%%% we can follow a finite sequence of interactions that eventually
-%%% enables the synchronisation t(s, r1, r2, m, p); and for each step
-%%% of such a sequence, the choices of the involved roles (if any)
-%%% cannot infinitely delay the enabling of t(s, r1, r2, m, p)
-%%%
-%%% Copyright 2018 Alceste Scalas <alceste.scalas @ imperial.ac.uk>
-%%% Released under the MIT License: https://opensource.org/licenses/MIT
-
 nu Z.(forall s1: Session . forall r1,r2: Role .
   ((exists m1: Message, p1: Payload . <i(c(s1, r1, r2, m1, p1))>true) =>
     mu Y.(
       (exists m1: Message, p1: Payload . <t(c(s1, r1, r2, m1, p1))>true)
+	  ||
+	  (<crasht(e(s1, r1))>true)
       ||
       (exists r3: Role .
         (exists r4: Role, m2: Message, p2: Payload .
-           <t(c(s1, r3, r4, m2, p2))>true)
+           <t(c(s1, r3, r4, m2, p2))>true
+		   ||
+		   <crasht(e(s1, r3))>true
+		)
         &&
         (forall r4: Role, m2: Message, p2: Payload .
-           [t(c(s1, r3, r4, m2, p2))]Y)
+           [t(c(s1, r3, r4, m2, p2))]Y
+		   &&
+		   [crash(e(s1, r3))]Y
+		   &&
+		   [crasht(e(s1, r3))]Y
+		)
       )
     )
   )
@@ -25,17 +26,33 @@ nu Z.(forall s1: Session . forall r1,r2: Role .
   (forall m1: Message, p1: Payload .
     <o(c(s1, r1, r2, m1, p1))>true =>
       mu Y.(
-        <t(c(s1, r1, r2, m1, p1))>true
+        (<t(c(s1, r1, r2, m1, p1))>true)
+		||
+		(<crasht(e(s1, r2))>true)
         ||
         (exists r3: Role .
           (exists r4: Role, m2: Message, p2: Payload .
-             <t(c(s1, r3, r4, m2, p2))>true)
+             <t(c(s1, r3, r4, m2, p2))>true
+			 ||
+			 <crasht(e(s1,r3))>true
+		  )
           &&
           (forall r4: Role, m2: Message, p2: Payload .
-             [t(c(s1, r3, r4, m2, p2))]Y)
+             [t(c(s1, r3, r4, m2, p2))]Y
+			 &&
+			 [crash(e(s1,r3))]Y
+			 &&
+			 [crasht(e(s1, r3))]Y
+		  )
         )
       )
   )
   &&
-  (forall r3,r4: Role, m2: Message, p2: Payload . [t(c(s1, r3, r4, m2, p2))]Z)
+  (forall r3,r4: Role, m2: Message, p2: Payload .
+	[t(c(s1, r3, r4, m2, p2))]Z
+	&&
+	[crash(e(s1, r3))]Z
+	&&
+	[crasht(e(s1, r3))]Z
+  )
 )
