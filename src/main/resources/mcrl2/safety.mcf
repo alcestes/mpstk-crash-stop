@@ -10,9 +10,11 @@
 
 nu X.(
   (forall s1: Session, r1,r2: Role, m1,m2: Message, p1,p2: Payload .
-    ((<o(c(s1, r1, r2, m1, p1))>true &&
-      (<i(c(s1, r1, r2, m2, p2))>true || <crashDetect(e(s1, r1))>true)) =>
+    ((<o(c(s1, r1, r2, m1, p1))>true && (<i(c(s1, r1, r2, m2, p2))>true || <crashed(e(s1,r2))>true)) =>
       <t(c(s1, r1, r2, m1, p1))>true)
+    &&
+    ((<crashed(e(s1,r1))>true && <crashDetect(e(s1, r1))>true) =>
+      <crasht(e(s1,r1))>true)
     &&
     [t(c(s1, r1, r2, m1, p1))]X
     &&
